@@ -89,4 +89,94 @@ def test_update_task_progress():
                 break
     assert task_found
 
+def test_add_phase():
+    phase_data = {
+        "name": "Phase Baru TDD",
+        "code": "3"
+    }
+    response = client.post("/api/roadmap/phase", json=phase_data)
+    assert response.status_code == 200
+    
+    # Verify phase was added
+    response = client.get("/api/roadmap")
+    data = response.json()
+    phase_found = False
+    for p in data["phases"]:
+        if p["code"] == "3":
+            assert p["name"] == "Phase Baru TDD"
+            phase_found = True
+            break
+    assert phase_found
+
+def test_update_phase():
+    # Update phase name
+    update_data = {
+        "name": "Phase Baru TDD Updated"
+    }
+    response = client.post("/api/roadmap/phase/3", json=update_data)
+    assert response.status_code == 200
+    
+    # Verify phase was updated
+    response = client.get("/api/roadmap")
+    data = response.json()
+    phase_found = False
+    for p in data["phases"]:
+        if p["code"] == "3":
+            assert p["name"] == "Phase Baru TDD Updated"
+            phase_found = True
+            break
+    assert phase_found
+
+def test_add_task():
+    task_data = {
+        "phase_code": "3",
+        "code": "3.TSK",
+        "name": "Task TDD Baru"
+    }
+    response = client.post("/api/roadmap/task", json=task_data)
+    assert response.status_code == 200
+    
+    # Verify task was added under Phase 3
+    response = client.get("/api/roadmap")
+    data = response.json()
+    task_found = False
+    for p in data["phases"]:
+        if p["code"] == "3":
+            for t in p["tasks"]:
+                if t["code"] == "3.TSK":
+                    assert t["name"] == "Task TDD Baru"
+                    task_found = True
+                    break
+    assert task_found
+
+def test_delete_task():
+    response = client.delete("/api/roadmap/task/3.TSK")
+    assert response.status_code == 200
+    
+    # Verify task is deleted
+    response = client.get("/api/roadmap")
+    data = response.json()
+    task_found = False
+    for p in data["phases"]:
+        if p["code"] == "3":
+            for t in p["tasks"]:
+                if t["code"] == "3.TSK":
+                    task_found = True
+    assert not task_found
+
+def test_delete_phase():
+    response = client.delete("/api/roadmap/phase/3")
+    assert response.status_code == 200
+    
+    # Verify phase is deleted
+    response = client.get("/api/roadmap")
+    data = response.json()
+    phase_found = False
+    for p in data["phases"]:
+        if p["code"] == "3":
+            phase_found = True
+            break
+    assert not phase_found
+
+
 

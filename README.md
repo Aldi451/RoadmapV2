@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ## Tujuan Sistem
 
 Web digunakan sebagai **Project Roadmap Management System** untuk memonitor implementasi project dari fase preparation sampai final implementation.
@@ -86,10 +87,90 @@ Fitur utama:
 ┌────────────────────────┐
 │ Save PostgreSQL        │
 └────────────────────────┘
+=======
+# Enterprise Roadmap Pro | Fortunasuite Malioboro
+
+Aplikasi manajemen roadmap proyek berbasis web interaktif dengan Gantt Chart, visualisasi periodik, dan pengelolaan tugas (Phases & Tasks) secara dinamis. Proyek ini dibangun dengan backend **FastAPI** dan frontend **Vue.js 3** + **Tailwind CSS**.
+
+---
+
+## 🚀 Fitur Utama
+
+1. **Gantt Chart Interaktif & Responsif**:
+   - Visualisasi jadwal rencana (*Planned*) dan realisasi (*Actual*) tugas secara berdampingan.
+   - Fitur drag-and-drop dan resize bar untuk mengubah tanggal langsung dari grafik.
+   - Pembedaan warna otomatis pada hari Sabtu dan Minggu (Merah & Magenta) serta penanda Hari Libur Nasional Indonesia.
+
+2. **Roadmap Tools Manager (Terpusat)**:
+   - Panel kontrol khusus yang diakses via tombol **Tools** di pojok kanan bawah.
+   - **Kelompok / Phase**: Tambah, ubah nama, dan hapus phase secara langsung.
+   - **Tugas / Sub-names**: Tambah tugas baru, hubungkan sebagai sub-task dari tugas induk, ubah nama, atau hapus tugas/subtask.
+
+3. **Manajer Sub-task & Komentar**:
+   - Fitur pengelolaan sub-task rinci dan komentar/remarks kolaboratif per departemen langsung pada remarks tugas.
+   - Kolom progres tugas yang terhitung dinamis dari sub-task aktif.
+
+4. **Sistem TDD (Test-Driven Development)**:
+   - Pengujian terotomatisasi di sisi backend menggunakan `pytest` untuk menjamin stabilitas fungsionalitas CRUD.
+
+---
+
+## 🛠️ Persyaratan Sistem
+
+- Python 3.10+
+- Pip (Python Package Installer)
+- Git (untuk kontrol repositori)
+
+---
+
+## 📦 Cara Instalasi
+
+1. Clone repositori ke komputer lokal Anda:
+   ```bash
+   git clone https://github.com/Aldi451/RoadmapV2.git
+   cd RoadmapV2
+   ```
+
+2. Instal dependensi yang diperlukan:
+   ```bash
+   pip install fastapi uvicorn sqlalchemy pydantic pytest httpx
+   ```
+
+---
+
+## ⚙️ Menjalankan Aplikasi
+
+Anda dapat menggunakan script `.bat` yang telah disediakan untuk mempermudah operasional sehari-hari:
+
+### 1. Menjalankan Server Lokal
+Cukup klik ganda (double-click) berkas:
+- **`run_server.bat`**
+*Script ini akan otomatis mengaktifkan server FastAPI lokal pada `http://127.0.0.1:8000/` dan langsung membuka browser Anda.*
+
+### 2. Mengunggah Perubahan ke GitHub
+Untuk melakukan commit dan push secara cepat ke repositori GitHub:
+- **`git_upload.bat`**
+*Masukkan pesan commit Anda saat diminta, dan script akan melakukan git add, commit, dan push secara otomatis.*
+
+### 3. Sinkronisasi & Pemulihan (Restore)
+Untuk mengambil update terbaru dari GitHub atau memulihkan file lokal Anda jika terjadi error:
+- **`git_restore.bat`**
+  - **Opsi 1 (Update):** Melakukan `git pull` tanpa menghapus file lokal Anda.
+  - **Opsi 2 (Restore):** Melakukan hard reset untuk mengembalikan seluruh codebase persis seperti di GitHub (menghapus perubahan lokal Anda).
+
+---
+
+## 🧪 Pengujian (TDD)
+
+Backend dilengkapi dengan unit-test terintegrasi untuk memvalidasi endpoint API. Untuk menjalankan pengujian, jalankan perintah berikut di direktori root:
+```bash
+pytest
+>>>>>>> 4744698 (perbaikan ke 2)
 ```
 
 ---
 
+<<<<<<< HEAD
 # Struktur Roadmap
 
 ```text
@@ -439,3 +520,17 @@ Data     Realtime
           Progress
 ```
 
+=======
+## 🌐 Dokumentasi API Endpoints
+
+| Method | Endpoint | Deskripsi |
+| :--- | :--- | :--- |
+| **GET** | `/api/roadmap` | Mengambil seluruh data roadmap (Phase, Task, Subtask). |
+| **POST** | `/api/roadmap/update-task` | Memperbarui atribut tugas (tanggal, status, note, progres, nama, dll). |
+| **POST** | `/api/roadmap/phase` | Menambahkan kelompok/phase baru. |
+| **POST** | `/api/roadmap/phase/{code}` | Mengubah nama kelompok/phase yang ada. |
+| **DELETE** | `/api/roadmap/phase/{code}` | Menghapus kelompok/phase beserta seluruh tugas di dalamnya. |
+| **POST** | `/api/roadmap/task` | Menambahkan tugas atau subtask baru. |
+| **DELETE** | `/api/roadmap/task/{code}` | Menghapus tugas berdasarkan kodenya. |
+| **GET** | `/api/holidays` | Mengambil daftar hari libur nasional. |
+>>>>>>> 4744698 (perbaikan ke 2)

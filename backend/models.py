@@ -55,6 +55,23 @@ class TaskUpdate(BaseModel):
     actual_finish: Optional[str] = None
     actual_days: Optional[int] = None
     status: Optional[str] = None
+    progress: Optional[int] = None
     note: Optional[str] = None
     is_active: Optional[bool] = None
+
+class PhaseCreate(BaseModel):
+    name: str
+    code: str
+
+class PhaseUpdate(BaseModel):
+    name: Optional[str] = None
+    status: Optional[str] = None
+
+class TaskCreate(BaseModel):
+    phase_code: str
+    code: str
+    name: str
+    parent_code: Optional[str] = None
+
+
 

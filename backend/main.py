@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
 from sqlalchemy.orm import Session
-from .models import Roadmap, Phase, Task, TaskUpdate
+from .models import Roadmap, Phase, Task, TaskUpdate, PhaseCreate, PhaseUpdate, TaskCreate
 from .database import engine, Base, init_db, get_db, DBProject, DBPhase, DBTask
 from typing import List
 
@@ -169,12 +169,83 @@ async def update_task(update: TaskUpdate, db: Session = Depends(get_db)):
     if update.actual_finish is not None: task.actual_finish = update.actual_finish
     if update.actual_days is not None: task.actual_days = update.actual_days
     if update.status is not None: task.status = update.status
+    if update.progress is not None: task.progress = update.progress
     if update.note is not None: task.note = update.note
     if update.is_active is not None: task.is_active = update.is_active
+
 
     
     db.commit()
     return {"message": "Updated successfully"}
+
+@app.post("/api/roadmap/phase")
+async def add_phase(phase: PhaseCreate, db: Session = Depends(get_db)):
+    proj = db.query(DBProject).first()
+    if not proj:
+        proj = DBProject(project_name="Project Roadmap : Fortunasuite Malioboro")
+        db.add(proj)
+        db.commit()
+        db.refresh(proj)
+    
+    max_sort = db.query(DBPhase).filter_by(project_id=proj.id).count()
+    
+    db_phase = DBPhase(
+        project_id=proj.id,
+        phase_name=phase.name,
+        code=phase.code,
+        sort_order=max_sort + 1
+    )
+    db.add(db_phase)
+    db.commit()
+    return {"message": "Phase added successfully"}
+
+@app.post("/api/roadmap/phase/{code}")
+async def update_phase(code: str, update: PhaseUpdate, db: Session = Depends(get_db)):
+    db_phase = db.query(DBPhase).filter_by(code=code).first()
+    if not db_phase:
+        raise HTTPException(status_code=404, detail="Phase not found")
+    if update.name is not None:
+        db_phase.phase_name = update.name
+    if update.status is not None:
+        db_phase.status = update.status
+    db.commit()
+    return {"message": "Phase updated successfully"}
+
+@app.delete("/api/roadmap/phase/{code}")
+async def delete_phase(code: str, db: Session = Depends(get_db)):
+    db_phase = db.query(DBPhase).filter_by(code=code).first()
+    if not db_phase:
+        raise HTTPException(status_code=404, detail="Phase not found")
+    db.delete(db_phase)
+    db.commit()
+    return {"message": "Phase deleted successfully"}
+
+@app.post("/api/roadmap/task")
+async def add_task(task: TaskCreate, db: Session = Depends(get_db)):
+    phase = db.query(DBPhase).filter_by(code=task.phase_code).first()
+    if not phase:
+        raise HTTPException(status_code=404, detail="Phase not found")
+    
+    db_task = DBTask(
+        phase_id=phase.id,
+        code=task.code,
+        task_name=task.name,
+        parent_code=task.parent_code,
+        is_active=True,
+        status="Scheduled"
+    )
+    db.add(db_task)
+    db.commit()
+    return {"message": "Task added successfully"}
+
+@app.delete("/api/roadmap/task/{code}")
+async def delete_task(code: str, db: Session = Depends(get_db)):
+    db_task = db.query(DBTask).filter_by(code=code).first()
+    if not db_task:
+        raise HTTPException(status_code=404, detail="Task not found")
+    db.delete(db_task)
+    db.commit()
+    return {"message": "Task deleted successfully"}
 
 if __name__ == "__main__":
     import uvicorn

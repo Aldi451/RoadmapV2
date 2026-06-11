@@ -209,7 +209,7 @@
                     </div>
                     <template v-for="(task, taskIdx) in phase.tasks" :key="task.code">
                         <div v-show="!phase.isCollapsed" class="task-row">
-                            <div class="sticky-sidebar !bg-white border-b border-slate-100"><div class="flex w-full h-full" :class="{'opacity-50': !task.is_active}"><div class="col-fix w-chk h-full"><input type="checkbox" v-model="task.is_active" @change="markAsChanged(task)" class="w-3 h-3 rounded cursor-pointer accent-indigo-600"></div><span class="col-fix w-cod font-medium text-[10px] tracking-tighter text-slate-400">{{ task.code }}</span><span class="col-fix w-des font-medium text-slate-800 text-[11px] flex justify-between items-center pr-2"><span class="truncate">{{ task.name }}</span><div class="flex gap-1"><button @click.stop="openSubtaskManager(task)" class="hover:bg-slate-100 p-1 rounded transition-colors flex-shrink-0 text-slate-400 hover:text-indigo-600" title="Manage Sub-tasks"><i data-lucide="settings-2" class="w-3 h-3"></i></button><button @click.stop="openCommentModal(task)" class="hover:bg-slate-100 p-1 rounded transition-colors flex-shrink-0" :title="getCommentCount(task.note) + ' Komentar'"><i data-lucide="message-square" class="w-3 h-3" :class="getCommentCount(task.note) > 0 ? 'text-indigo-600 fill-indigo-100' : 'text-slate-400'"></i></button></div></span></div></div>
+                            <div class="sticky-sidebar !bg-white border-b border-slate-100"><div class="flex w-full h-full" :class="{'opacity-50': !task.is_active}"><div class="col-fix w-chk h-full"><input type="checkbox" v-model="task.is_active" @change="markAsChanged(task)" class="w-3 h-3 rounded cursor-pointer accent-indigo-600"></div><span class="col-fix w-cod font-medium text-[10px] tracking-tighter text-slate-400">{{ task.code }}</span><span class="col-fix w-des font-medium text-slate-800 text-[11px] pr-2"><span class="truncate">{{ task.name }}</span></span></div></div>
                             <div class="flex items-stretch border-b border-slate-100" :class="{'opacity-50': !task.is_active}">
                                 <div class="col-fix w-dat border-l border-slate-100 p-0.5"><input v-datepicker v-model="task.start_date" @input="markAsChanged(task)" class="date-picker-input" placeholder="dd/mm/yyyy"></div>
                                 <div class="col-fix w-dat border-l border-slate-100 p-0.5"><input v-datepicker v-model="task.finish_date" @input="markAsChanged(task)" class="date-picker-input" placeholder="dd/mm/yyyy"></div>
@@ -259,7 +259,7 @@
                         <template v-if="task.sub_tasks && task.sub_tasks.length > 0">
                             <template v-for="(subTask, subIdx) in task.sub_tasks" :key="subTask.code">
                                 <div v-show="!phase.isCollapsed && subTask.is_active" class="task-row bg-slate-50/50">
-                                    <div class="sticky-sidebar !bg-slate-50 border-b border-slate-100"><div class="flex w-full h-full" :class="{'opacity-50': !subTask.is_active}"><div class="col-fix w-chk h-full"><input type="checkbox" v-model="subTask.is_active" @change="markAsChanged(subTask)" class="w-3 h-3 rounded cursor-pointer accent-indigo-600"></div><span class="col-fix w-cod font-medium text-[10px] tracking-tighter text-slate-400 pl-3">↳ {{ subTask.code }}</span><span class="col-fix w-des font-medium text-slate-700 text-[10px] flex justify-between items-center pr-2"><span class="truncate">{{ subTask.name }}</span><button @click.stop="openCommentModal(subTask)" class="hover:bg-slate-100 p-1 rounded transition-colors flex-shrink-0" :title="getCommentCount(subTask.note) + ' Komentar'"><i data-lucide="message-square" class="w-3 h-3" :class="getCommentCount(subTask.note) > 0 ? 'text-indigo-600 fill-indigo-100' : 'text-slate-400'"></i></button></span></div></div>
+                                    <div class="sticky-sidebar !bg-slate-50 border-b border-slate-100"><div class="flex w-full h-full" :class="{'opacity-50': !subTask.is_active}"><div class="col-fix w-chk h-full"><input type="checkbox" v-model="subTask.is_active" @change="markAsChanged(subTask)" class="w-3 h-3 rounded cursor-pointer accent-indigo-600"></div><span class="col-fix w-cod font-medium text-[10px] tracking-tighter text-slate-400 pl-3">↳ {{ subTask.code }}</span><span class="col-fix w-des font-medium text-slate-700 text-[10px] pr-2"><span class="truncate">{{ subTask.name }}</span></span></div></div>
                                     <div class="flex items-stretch border-b border-slate-100" :class="{'opacity-50': !subTask.is_active}">
                                         <div class="col-fix w-dat border-l border-slate-100 p-0.5"><input v-datepicker v-model="subTask.start_date" @input="markAsChanged(subTask)" class="date-picker-input" placeholder="dd/mm/yyyy"></div>
                                         <div class="col-fix w-dat border-l border-slate-100 p-0.5"><input v-datepicker v-model="subTask.finish_date" @input="markAsChanged(subTask)" class="date-picker-input" placeholder="dd/mm/yyyy"></div>
@@ -386,6 +386,139 @@
             </div>
         </div>
 
+        <!-- Floating Tools Button in bottom right -->
+        <div class="fixed bottom-6 right-6 z-[9999]">
+            <button @click="openToolsModal" class="bg-indigo-600 hover:bg-indigo-700 text-white rounded-full py-3 px-5 shadow-2xl transition-all hover:scale-105 flex items-center gap-2 font-bold text-xs">
+                <i data-lucide="settings" class="w-4 h-4"></i> Tools
+            </button>
+        </div>
+
+        <!-- Tools Manager Modal -->
+        <div v-if="activeToolsModal" class="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm" @click.self="closeToolsModal">
+            <div class="bg-white rounded-xl shadow-2xl w-[950px] border border-slate-200 overflow-hidden flex flex-col transform transition-all max-h-[85vh]">
+                <!-- Modal Header -->
+                <div class="p-4 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
+                    <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2"><i data-lucide="settings" class="w-4 h-4 text-indigo-600"></i> Roadmap Tools Manager</h3>
+                    <button @click="closeToolsModal" class="text-slate-400 hover:text-slate-600 transition-colors"><i data-lucide="x" class="w-4 h-4"></i></button>
+                </div>
+                
+                <!-- Modal Body -->
+                <div class="flex flex-row overflow-hidden h-[60vh]">
+                    <!-- Left Sidebar: Phases -->
+                    <div class="w-1/3 border-r border-slate-200 p-4 overflow-y-auto flex flex-col gap-4 bg-slate-50">
+                        <div class="font-bold text-xs text-slate-500 uppercase tracking-wider">Phases (Kelompok)</div>
+                        
+                        <!-- List of Phases -->
+                        <div class="flex flex-col gap-2">
+                            <div v-for="p in roadmap.phases" :key="p.code" 
+                                 @click="selectPhaseForTools(p)"
+                                 class="p-2.5 rounded-lg border transition-all cursor-pointer flex items-center justify-between"
+                                 :class="selectedPhaseForTools && selectedPhaseForTools.code === p.code ? 'bg-indigo-50 border-indigo-200 shadow-sm' : 'bg-white border-slate-200 hover:bg-slate-100/55'">
+                                
+                                <div class="flex flex-col flex-1 min-w-0 pr-2">
+                                    <span class="text-[9px] font-bold text-indigo-600">CODE: {{ p.code }}</span>
+                                    <div v-if="editingPhase && editingPhase.code === p.code" class="flex gap-1 mt-1" @click.stop>
+                                        <input v-model="editingPhase.name" class="text-[11px] px-2 py-1 border rounded w-full focus:outline-none focus:border-indigo-500">
+                                        <button @click="handleUpdatePhase" class="bg-emerald-600 text-white p-1 rounded hover:bg-emerald-700"><i data-lucide="check" class="w-3.5 h-3.5"></i></button>
+                                        <button @click="editingPhase = null" class="bg-slate-200 text-slate-600 p-1 rounded hover:bg-slate-300"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
+                                    </div>
+                                    <span v-else class="text-[11px] font-bold text-slate-700 truncate">{{ p.name }}</span>
+                                </div>
+
+                                <div class="flex gap-1 flex-shrink-0" v-if="!editingPhase || editingPhase.code !== p.code">
+                                    <button @click.stop="startEditPhase(p)" class="text-slate-400 hover:text-indigo-600 p-1 rounded hover:bg-slate-200 transition-colors"><i data-lucide="edit-2" class="w-3.5 h-3.5"></i></button>
+                                    <button @click.stop="handleDeletePhase(p.code)" class="text-slate-400 hover:text-red-600 p-1 rounded hover:bg-slate-200 transition-colors"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Add Phase Section -->
+                        <div class="mt-auto pt-4 border-t border-slate-200 flex flex-col gap-2">
+                            <div class="font-bold text-[10px] text-slate-500 uppercase tracking-wider">Tambah Phase Baru</div>
+                            <div class="flex gap-1.5">
+                                <input v-model="newPhase.code" placeholder="Code" class="text-[11px] px-2 py-1.5 border rounded w-1/3 focus:outline-none focus:border-indigo-500">
+                                <input v-model="newPhase.name" placeholder="Nama Phase..." class="text-[11px] px-2 py-1.5 border rounded w-2/3 focus:outline-none focus:border-indigo-500">
+                            </div>
+                            <button @click="handleAddPhase" :disabled="!newPhase.name || !newPhase.code" class="bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 text-white font-bold py-1.5 rounded text-xs transition-colors flex items-center justify-center gap-1">
+                                <i data-lucide="plus" class="w-3.5 h-3.5"></i> Tambah Phase
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Right Side: Tasks / Sub-names -->
+                    <div class="w-2/3 p-4 overflow-y-auto flex flex-col gap-4 bg-white">
+                        <div v-if="!selectedPhaseForTools" class="text-center text-slate-400 text-xs py-12 italic">Pilih Phase di sebelah kiri untuk mengelola Task/Sub-name.</div>
+                        <div v-else class="flex flex-col h-full">
+                            <div class="font-bold text-xs text-slate-500 uppercase tracking-wider mb-2">Tasks / Sub-names di "{{ selectedPhaseForTools.name }}"</div>
+                            
+                            <!-- Tasks List -->
+                            <div class="flex-1 overflow-y-auto flex flex-col gap-2 pr-1 mb-4">
+                                <template v-for="t in selectedPhaseForTools.tasks" :key="t.code">
+                                    <!-- Parent Task -->
+                                    <div class="p-2.5 rounded-lg border border-slate-100 bg-slate-50/50 hover:bg-slate-50 flex items-center justify-between">
+                                        <div class="flex flex-col flex-1 min-w-0 pr-2">
+                                            <span class="text-[9px] font-bold text-slate-400">CODE: {{ t.code }}</span>
+                                            <div v-if="editingTask && editingTask.code === t.code" class="flex gap-1 mt-1">
+                                                <input v-model="editingTask.name" class="text-[11px] px-2 py-1 border rounded w-full focus:outline-none focus:border-indigo-500">
+                                                <button @click="handleUpdateTaskName" class="bg-emerald-600 text-white p-1 rounded hover:bg-emerald-700"><i data-lucide="check" class="w-3.5 h-3.5"></i></button>
+                                                <button @click="editingTask = null" class="bg-slate-200 text-slate-600 p-1 rounded hover:bg-slate-300"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
+                                            </div>
+                                            <span v-else class="text-[11px] font-bold text-slate-700 truncate">{{ t.name }}</span>
+                                        </div>
+                                        <div class="flex gap-1 flex-shrink-0" v-if="!editingTask || editingTask.code !== t.code">
+                                            <button @click="startEditTask(t)" class="text-slate-400 hover:text-indigo-600 p-1 rounded hover:bg-white transition-colors border border-transparent hover:border-slate-100" title="Edit Name"><i data-lucide="edit-2" class="w-3.5 h-3.5"></i></button>
+                                            <button @click="handleDeleteTask(t.code)" class="text-slate-400 hover:text-red-600 p-1 rounded hover:bg-white transition-colors border border-transparent hover:border-slate-100" title="Delete Task"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Subtasks -->
+                                    <div v-for="st in t.sub_tasks" :key="st.code" class="ml-6 p-2 rounded-lg border border-slate-100 bg-white hover:bg-slate-50/50 flex items-center justify-between">
+                                        <div class="flex flex-col flex-1 min-w-0 pr-2">
+                                            <span class="text-[9px] font-bold text-slate-400">↳ Sub-task Code: {{ st.code }}</span>
+                                            <div v-if="editingTask && editingTask.code === st.code" class="flex gap-1 mt-1">
+                                                <input v-model="editingTask.name" class="text-[11px] px-2 py-1 border rounded w-full focus:outline-none focus:border-indigo-500">
+                                                <button @click="handleUpdateTaskName" class="bg-emerald-600 text-white p-1 rounded hover:bg-emerald-700"><i data-lucide="check" class="w-3.5 h-3.5"></i></button>
+                                                <button @click="editingTask = null" class="bg-slate-200 text-slate-600 p-1 rounded hover:bg-slate-300"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
+                                            </div>
+                                            <span v-else class="text-[10px] font-medium text-slate-600 truncate">{{ st.name }}</span>
+                                        </div>
+                                        <div class="flex gap-1 flex-shrink-0" v-if="!editingTask || editingTask.code !== st.code">
+                                            <button @click="startEditTask(st)" class="text-slate-400 hover:text-indigo-600 p-1 rounded hover:bg-white transition-colors border border-transparent hover:border-slate-100" title="Edit Sub-task"><i data-lucide="edit-2" class="w-3.5 h-3.5"></i></button>
+                                            <button @click="handleDeleteTask(st.code)" class="text-slate-400 hover:text-red-600 p-1 rounded hover:bg-white transition-colors border border-transparent hover:border-slate-100" title="Delete Sub-task"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                                        </div>
+                                    </div>
+                                </template>
+                                <div v-if="selectedPhaseForTools.tasks.length === 0" class="text-center text-slate-400 text-xs py-8 italic">Belum ada task di phase ini.</div>
+                            </div>
+
+                            <!-- Add Task Section -->
+                            <div class="mt-auto pt-4 border-t border-slate-200 flex flex-col gap-2">
+                                <div class="font-bold text-[10px] text-slate-500 uppercase tracking-wider">Tambah Task / Sub-name Baru</div>
+                                <div class="flex gap-2">
+                                    <input v-model="newTask.code" placeholder="Code (cth: 1.1)" class="text-[11px] px-2.5 py-1.5 border rounded w-1/4 focus:outline-none focus:border-indigo-500">
+                                    <input v-model="newTask.name" placeholder="Nama Task..." class="text-[11px] px-2.5 py-1.5 border rounded w-1/2 focus:outline-none focus:border-indigo-500">
+                                    <select v-model="newTask.parent_code" class="text-[11px] px-2 py-1.5 border rounded w-1/4 focus:outline-none focus:border-indigo-500">
+                                        <option value="">(No Parent)</option>
+                                        <option v-for="pt in selectedPhaseForTools.tasks" :key="pt.code" :value="pt.code">{{ pt.code }}</option>
+                                    </select>
+                                </div>
+                                <button @click="handleAddTask" :disabled="!newTask.name || !newTask.code" class="bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 text-white font-bold py-1.5 rounded text-xs transition-colors flex items-center justify-center gap-1">
+                                    <i data-lucide="plus" class="w-3.5 h-3.5"></i> Tambah Task
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal Footer -->
+                <div class="p-4 border-t border-slate-100 bg-slate-50 flex justify-end">
+                    <button @click="closeToolsModal" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-lg text-xs transition-colors flex items-center justify-center gap-2">
+                        <i data-lucide="check" class="w-3 h-3"></i> Selesai
+                    </button>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <script>
@@ -400,6 +533,15 @@
                 const currentYear = ref(2025), startMonth = ref(0), endMonth = ref(11);
                 // Sub-task Manager state
                 const activeManageTask = ref(null);
+                
+                // Tools Modal State
+                const activeToolsModal = ref(false);
+                const selectedPhaseForTools = ref(null);
+                const newPhase = ref({ name: '', code: '' });
+                const editingPhase = ref(null);
+                const newTask = ref({ name: '', code: '', parent_code: '' });
+                const editingTask = ref(null);
+
                 
                 const masterSubtasks = [
                     { code: "FOS", name: "FO Setup", group: "FO" }, { code: "FOT", name: "FO Training", group: "FO" },
@@ -938,6 +1080,162 @@
                     }
                 };
 
+                const openToolsModal = () => {
+                    activeToolsModal.value = true;
+                    if (roadmap.value.phases && roadmap.value.phases.length > 0) {
+                        selectedPhaseForTools.value = roadmap.value.phases[0];
+                    }
+                    if (window.lucide) setTimeout(() => lucide.createIcons(), 50);
+                };
+
+                const closeToolsModal = () => {
+                    activeToolsModal.value = false;
+                    editingPhase.value = null;
+                    editingTask.value = null;
+                };
+
+                const selectPhaseForTools = (phase) => {
+                    selectedPhaseForTools.value = phase;
+                    editingPhase.value = null;
+                    editingTask.value = null;
+                    if (window.lucide) setTimeout(() => lucide.createIcons(), 50);
+                };
+
+                const handleAddPhase = async () => {
+                    if (!newPhase.value.name || !newPhase.value.code) return;
+                    try {
+                        const res = await fetch('/api/roadmap/phase', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ name: newPhase.value.name, code: newPhase.value.code })
+                        });
+                        if (res.ok) {
+                            const codeTemp = newPhase.value.code;
+                            newPhase.value = { name: '', code: '' };
+                            await fetchData();
+                            if (roadmap.value.phases) {
+                                const added = roadmap.value.phases.find(p => p.code === codeTemp);
+                                if (added) selectedPhaseForTools.value = added;
+                                else selectedPhaseForTools.value = roadmap.value.phases[roadmap.value.phases.length - 1];
+                            }
+                        }
+                    } catch (e) {
+                        console.error(e);
+                    }
+                };
+
+                const startEditPhase = (phase) => {
+                    editingPhase.value = { code: phase.code, name: phase.name };
+                    if (window.lucide) setTimeout(() => lucide.createIcons(), 50);
+                };
+
+                const handleUpdatePhase = async () => {
+                    if (!editingPhase.value || !editingPhase.value.name) return;
+                    try {
+                        const res = await fetch(`/api/roadmap/phase/${editingPhase.value.code}`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ name: editingPhase.value.name })
+                        });
+                        if (res.ok) {
+                            editingPhase.value = null;
+                            await fetchData();
+                            if (selectedPhaseForTools.value) {
+                                selectedPhaseForTools.value = roadmap.value.phases.find(p => p.code === selectedPhaseForTools.value.code);
+                            }
+                        }
+                    } catch (e) {
+                        console.error(e);
+                    }
+                };
+
+                const handleDeletePhase = async (code) => {
+                    if (!confirm("Apakah Anda yakin ingin menghapus phase ini beserta semua task di dalamnya?")) return;
+                    try {
+                        const res = await fetch(`/api/roadmap/phase/${code}`, {
+                            method: 'DELETE'
+                        });
+                        if (res.ok) {
+                            await fetchData();
+                            if (selectedPhaseForTools.value && selectedPhaseForTools.value.code === code) {
+                                selectedPhaseForTools.value = roadmap.value.phases[0] || null;
+                            }
+                        }
+                    } catch (e) {
+                        console.error(e);
+                    }
+                };
+
+                const handleAddTask = async () => {
+                    if (!selectedPhaseForTools.value || !newTask.value.name || !newTask.value.code) return;
+                    try {
+                        const res = await fetch('/api/roadmap/task', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                phase_code: selectedPhaseForTools.value.code,
+                                code: newTask.value.code,
+                                name: newTask.value.name,
+                                parent_code: newTask.value.parent_code || null
+                            })
+                        });
+                        if (res.ok) {
+                            newTask.value = { name: '', code: '', parent_code: '' };
+                            await fetchData();
+                            if (selectedPhaseForTools.value) {
+                                selectedPhaseForTools.value = roadmap.value.phases.find(p => p.code === selectedPhaseForTools.value.code);
+                            }
+                        }
+                    } catch (e) {
+                        console.error(e);
+                    }
+                };
+
+                const startEditTask = (task) => {
+                    editingTask.value = { code: task.code, name: task.name };
+                    if (window.lucide) setTimeout(() => lucide.createIcons(), 50);
+                };
+
+                const handleUpdateTaskName = async () => {
+                    if (!editingTask.value || !editingTask.value.name) return;
+                    try {
+                        const res = await fetch('/api/roadmap/update-task', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                task_code: editingTask.value.code,
+                                name: editingTask.value.name
+                            })
+                        });
+                        if (res.ok) {
+                            editingTask.value = null;
+                            await fetchData();
+                            if (selectedPhaseForTools.value) {
+                                selectedPhaseForTools.value = roadmap.value.phases.find(p => p.code === selectedPhaseForTools.value.code);
+                            }
+                        }
+                    } catch (e) {
+                        console.error(e);
+                    }
+                };
+
+                const handleDeleteTask = async (code) => {
+                    if (!confirm("Apakah Anda yakin ingin menghapus task ini?")) return;
+                    try {
+                        const res = await fetch(`/api/roadmap/task/${code}`, {
+                            method: 'DELETE'
+                        });
+                        if (res.ok) {
+                            await fetchData();
+                            if (selectedPhaseForTools.value) {
+                                selectedPhaseForTools.value = roadmap.value.phases.find(p => p.code === selectedPhaseForTools.value.code);
+                            }
+                        }
+                    } catch (e) {
+                        console.error(e);
+                    }
+                };
+
                 onMounted(() => {
                     const savedPeriod = JSON.parse(localStorage.getItem('roadmap_period') || 'null');
                     if (savedPeriod) { startMonth.value = savedPeriod.startMonth; endMonth.value = savedPeriod.endMonth; currentYear.value = savedPeriod.currentYear; }
@@ -951,7 +1249,10 @@
                     activeCommentTask, parsedActiveComments, newComment, editingCommentIndex, getCommentCount, 
                     openCommentModal, closeCommentModal, cancelEdit, saveNewComment, editComment, deleteComment, 
                     activeManageTask, groupedSubtasks, toggleSubtask, openSubtaskManager, closeSubtaskManager,
-                    onDragStart, onDragOver, onDragEnd, onResizeStart, onPlaceholderStart, isShortBar, getBadgeStyle
+                    onDragStart, onDragOver, onDragEnd, onResizeStart, onPlaceholderStart, isShortBar, getBadgeStyle,
+                    activeToolsModal, selectedPhaseForTools, newPhase, editingPhase, newTask, editingTask,
+                    openToolsModal, closeToolsModal, selectPhaseForTools, handleAddPhase, startEditPhase, 
+                    handleUpdatePhase, handleDeletePhase, handleAddTask, startEditTask, handleUpdateTaskName, handleDeleteTask
                 };
             }
         }).directive('datepicker', {
